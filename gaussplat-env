@@ -1,0 +1,11 @@
+##################################################
+VSCUSER="vsc45248"
+HPC=$VSCUSER@login.hpc.ugent.be
+
+NAME="garden-10n"
+VIDEO_DIR="/Users/q/hub/desk/masterproef/dataset/garden"
+
+NIMAGES=10  # number of images to use for training
+WALLTIME="00:45:00"
+MEM="32gb"  # colmap no gpu needs at least 48gb
+##################################################

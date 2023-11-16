@@ -1,0 +1,85 @@
+#!/bin/bash
+source gaussplat-env
+
+#PBS -N $NAME               ## Job name
+#PBS -l nodes=1:ppn=12      ## 1 node, 2 processors per node (ppn=all to get a full node)
+#PBS -l walltime=$WALLTIME  ## Max time your job will run (no more than 72:00:00)
+#PBS -l mem=48              ## If not used, memory will be available proportional to the max amount
+#PBS -l gpus=1              ## GPU amount (only on accelgor or joltik)
+#PBS -m abe                 ## Email notifications (abe=aborted, begin and end)
+cd $PBS_O_WORKDIR           ## Change to the working directory to where the job was submitted
+ROOT=$(pwd)                 ## Save the root path of the job
+
+# the dir structure looks like this
+# scratch
+# ├── tasks
+# │   ├── $NAME
+# │   │   ├── gaussplat-env
+# │   │   ├── gaussplat-job
+# │   │   └── data
+# │   │       ├── env
+# │   │       ├── video-1.mp4
+# │   │       ├── video-2.mp4
+# │   │       └── ...
+# │   └ ...
+# └ models-ready
+#     ├── $NAME-model.zip
+#     └ ...
+
+msg () {
+    echo "\e[1;36m$1\e[0m"
+}
+
+msg "1. Extracting frames from video..."
+    module purge
+    module load FFmpeg/6.0-GCCcore-12.3.0
+    mkdir scene
+    mkdir scene/input  # for the frames
+    # todo add support for multiple videos using the env file in the data/ dir
+    ffmpeg -loglevel warning -nostats -i data/video-1.mp4 -vf "fps=1" scene/input/1-%04d.jpg
+
+
+
+msg "2. Converting frames..."
+    module purge
+    module load COLMAP/3.8-foss-2022b
+    # on hpc this is not available (yet)
+    curl -s https://raw.githubusercontent.com/graphdeco-inria/gaussian-splatting/main/convert.py > convert.py
+    time python3 convert.py --no_gpu -s scene > /dev/null # for hpc change python3 -> python
+    rm convert.py                                             # the script
+    rm -rf scene/distorted scene/stereo                                   # unnecessary folders that were generated
+    rm     scene/run-colmap-geometric.sh scene/run-colmap-photometric.sh  # unnecessary files that were generated
+    rm -rf scene/input  # not needed for training on hpc
+
+
+msg "Preparing training..."
+    module purge
+    module load CUDA/11.7.0
+    module load PyTorch/1.12.0-foss-2022a-CUDA-11.7.0
+    module load torchaudio/0.12.0-foss-2022a-PyTorch-1.12.0-CUDA-11.7.0
+    module load torchvision/0.13.1-foss-2022a-CUDA-11.7.0
+    # check whether gs is installed
+    if [ ! -d ~/scratch/gaussian-splatting ]; then
+        echo "Directory ~/scratch/gaussian-splatting does not exist"
+        echo "Trying to install gaussian-splatting"
+        cd ~/scratch
+        git clone https://github.com/graphdeco-inria/gaussian-splatting.git --recursive --quiet
+        cd gaussian-splatting
+        pip install tqdm plyfile
+        pip install submodules/simple-knn/
+        pip install submodules/diff-gaussian-rasterization/
+    fi
+    # check that cuda is available, will be printed to stdout
+    python -c "import torch; print('cuda available:', torch.cuda.is_available())"
+
+
+msg "3. Training..."
+    cd ~/scratch/gaussian-splatting
+    python train.py -s $ROOT/scene -m $ROOT/model
+
+
+msg "4. Finishing up..."
+    cd $ROOT
+    [ ! -d ~/scratch/models-ready ] && mkdir ~/scratch/models-ready
+    zip -r $(basename $ROOT)-model.zip model && mv $(basename $ROOT)-model.zip ~/scratch/models-ready
+    cd .. && rm -rf $(basename $ROOT)
