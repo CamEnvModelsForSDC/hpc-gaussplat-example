@@ -1,12 +1,4 @@
-#!/bin/bash
-source gaussplat-env
 
-#PBS -N $NAME               ## Job name
-#PBS -l nodes=1:ppn=12      ## 1 node, 2 processors per node (ppn=all to get a full node)
-#PBS -l walltime=$WALLTIME  ## Max time your job will run (no more than 72:00:00)
-#PBS -l mem=48              ## If not used, memory will be available proportional to the max amount
-#PBS -l gpus=1              ## GPU amount (only on accelgor or joltik)
-#PBS -m abe                 ## Email notifications (abe=aborted, begin and end)
 cd $PBS_O_WORKDIR           ## Change to the working directory to where the job was submitted
 ROOT=$(pwd)                 ## Save the root path of the job
 
@@ -25,6 +17,7 @@ ROOT=$(pwd)                 ## Save the root path of the job
 # └ models-ready
 #     ├── $NAME-model.zip
 #     └ ...
+
 
 msg () {
     echo "\e[1;36m$1\e[0m"

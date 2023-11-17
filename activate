@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Get the absolute path of the directory containing this script
+LIB=$(dirname "$(readlink -f "$0")")
+
+# Activate the library
+export PATH="$LIB/bin:$PATH"
+
+# Export the library path
+export GS_HPC_LIB="$LIB/lib"
+
+# Export the VSCUSER
+VSCUSER="vsc45248"
+
+echo "Library HPC-GAUSSPLAT activated"

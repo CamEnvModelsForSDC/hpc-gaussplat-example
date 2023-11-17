@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#PBS -N $NAME               ## Job name
+#PBS -l nodes=1:ppn=12      ## 1 node, 12 processors per node (ppn=all to get a full node)
+#PBS -l walltime=02:00:00  ## Max time your job will run (no more than 72:00:00)
+#PBS -l mem=48              ## If not used, memory will be available proportional to the max amount
+#PBS -l gpus=1              ## GPU amount (only on accelgor or joltik)
+#PBS -m abe                 ## Email notifications (abe=aborted, begin and end)
+
+NIMAGES=100  # number of images to use for training
