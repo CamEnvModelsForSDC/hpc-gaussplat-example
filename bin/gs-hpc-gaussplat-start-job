@@ -34,12 +34,7 @@ rm job.sh
 
 # submit the job on hpc
 echo "Submitting job on hpc..."
-ssh $VSCUSER@login.hpc.ugent.be << EOF
-    cd ~/scratch/tasks/$NAME
-    module swap cluster/accelgor
-    qsub job.sh > jobid.txt
-    echo "Job created with id: \$(cat jobid.txt)"
-EOF
+ssh $VSCUSER@login.hpc.ugent.be "cd ~/scratch/tasks/$NAME; module swap cluster/accelgor; qsub job.sh > jobid.txt; echo \"Job created with id: \$(cat jobid.txt)\""
 
 
 # TODO:
