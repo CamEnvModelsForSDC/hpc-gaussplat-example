@@ -24,7 +24,7 @@ echo "1. Extracting frames from videos..."
     mkdir scene/input  # for the frames
     # extract frames from all videos
     for file in video-*.mp4; do
-        ffmpeg -loglevel warning -nostats -i $file -vf "fps=1" scene/input/$(basename $file .mp4)-%04d.jpg
+        ffmpeg -loglevel warning -nostats -i $file -vf "fps=$FPS" scene/input/$(basename $file .mp4)-%04d.jpg
     done
 
 

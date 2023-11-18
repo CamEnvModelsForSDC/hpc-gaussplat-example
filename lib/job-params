@@ -7,4 +7,4 @@
 #PBS -l gpus=1              ## GPU amount (only on accelgor or joltik)
 #PBS -m abe                 ## Email notifications (abe=aborted, begin and end)
 
-NIMAGES=100  # number of images to use for training
+FPS=15  # FPS to use for extracting frames
