@@ -1,51 +1,47 @@
 
-cd $PBS_O_WORKDIR           ## Change to the working directory to where the job was submitted
+cd $PBS_O_WORKDIR           ## Change to the working directory to where the job was submitted (the task dir)
 ROOT=$(pwd)                 ## Save the root path of the job
 
-# the dir structure looks like this
-# scratch
-# ├── tasks
-# │   ├── $NAME
-# │   │   ├── gaussplat-env
-# │   │   ├── gaussplat-job
-# │   │   └── data
-# │   │       ├── env
-# │   │       ├── video-1.mp4
-# │   │       ├── video-2.mp4
-# │   │       └── ...
-# │   └ ...
-# └ models-ready
-#     ├── $NAME-model.zip
+# the expected dir structure on the hpc looks like this
+# scratch                       
+# └── tasks
+#     ├── $NAME
+#     │   ├── activity.csv
+#     │   ├── index.html
+#     │   ├── jobid.txt         (id of this job)
+#     │   ├── job.sh            (this file)
+#     │   ├── properties.csv
+#     │   ├── video-<angle>.mp4
+#     │   └── ...
 #     └ ...
 
 
-msg () {
-    echo "\e[1;36m$1\e[0m"
-}
 
-msg "1. Extracting frames from video..."
+echo "1. Extracting frames from videos..."
     module purge
     module load FFmpeg/6.0-GCCcore-12.3.0
     mkdir scene
     mkdir scene/input  # for the frames
-    # todo add support for multiple videos using the env file in the data/ dir
-    ffmpeg -loglevel warning -nostats -i data/video-1.mp4 -vf "fps=1" scene/input/1-%04d.jpg
+    # extract frames from all videos
+    for file in video-*.mp4; do
+        ffmpeg -loglevel warning -nostats -i $file -vf "fps=1" scene/input/$(basename $file .mp4)-%04d.jpg
+    done
 
 
 
-msg "2. Converting frames..."
+echo "2. Converting frames..."
     module purge
     module load COLMAP/3.8-foss-2022b
     # on hpc this is not available (yet)
     curl -s https://raw.githubusercontent.com/graphdeco-inria/gaussian-splatting/main/convert.py > convert.py
     time python3 convert.py --no_gpu -s scene > /dev/null # for hpc change python3 -> python
     rm convert.py                                             # the script
-    rm -rf scene/distorted scene/stereo                                   # unnecessary folders that were generated
-    rm     scene/run-colmap-geometric.sh scene/run-colmap-photometric.sh  # unnecessary files that were generated
-    rm -rf scene/input  # not needed for training on hpc
+    #rm -rf scene/distorted scene/stereo                                   # unnecessary folders that were generated
+    #rm     scene/run-colmap-geometric.sh scene/run-colmap-photometric.sh  # unnecessary files that were generated
+    #rm -rf scene/input  # not needed for training on hpc
 
 
-msg "Preparing training..."
+echo "Preparing training..."
     module purge
     module load CUDA/11.7.0
     module load PyTorch/1.12.0-foss-2022a-CUDA-11.7.0
@@ -63,16 +59,22 @@ msg "Preparing training..."
         pip install submodules/diff-gaussian-rasterization/
     fi
     # check that cuda is available, will be printed to stdout
+    # used for debugging
     python -c "import torch; print('cuda available:', torch.cuda.is_available())"
 
 
-msg "3. Training..."
+echo "3. Training..."
     cd ~/scratch/gaussian-splatting
     python train.py -s $ROOT/scene -m $ROOT/model
 
 
-msg "4. Finishing up..."
+echo "4. Finishing up..."
     cd $ROOT
-    [ ! -d ~/scratch/models-ready ] && mkdir ~/scratch/models-ready
-    zip -r $(basename $ROOT)-model.zip model && mv $(basename $ROOT)-model.zip ~/scratch/models-ready
-    cd .. && rm -rf $(basename $ROOT)
+    # basename $ROOT = $NAME
+    zip -r $(basename $ROOT)-model.zip model
+
+echo "Done!"
+
+# hint: use 
+# `scp $VSCUSER@login.hpc.ugent.be:~/scratch/tasks/$NAME/$NAME-model.zip .` 
+# to download the model on your local machine

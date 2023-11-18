@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Get the absolute path of the directory containing this script
-# Get the absolute path of the directory containing this script
 if [[ "$1" == "--local" ]]; then
     # Get the absolute path of the directory containing this script using $0
     LIB=$(dirname "$(readlink -f "$0")")
@@ -20,6 +19,6 @@ export PATH="$LIB/bin:$PATH"
 export GS_HPC_LIB="$LIB/lib"
 
 # Export the VSCUSER
-VSCUSER="vsc45248"
+export VSCUSER="vsc45248"
 
 echo "Library HPC-GAUSSPLAT activated"

@@ -1,13 +1,14 @@
 #!/bin/bash
 [ -z "$GS_HPC_LIB" ] && echo "Library HPC-GAUSSPLAT not activated (GS_HPC_LIB not set)" && exit 1
-
+echo $VSCUSER
 usage () {
     echo "Usage: $0 <task-name>"
 }
 
-# first argument: name of the task
+# first argument: name of the scene
 [ -z "$1" ] && echo "No task name given" && usage && exit 1
 # check that the task dir exists on hpc
+echo "Checking if task dir exists on hpc..."
 if [[ $(ssh $VSCUSER@login.hpc.ugent.be "if [ ! -d ~/scratch/tasks/$1 ]; then echo 1; else echo 0; fi") == 1 ]]; then
     echo "Directory ~/scratch/tasks/$1 does not exist on hpc"
     exit 1
@@ -16,23 +17,23 @@ fi
 NAME=$1
 
 # create job file
-touch job.sh
-cat $GS_HPC_LIB/job-params >> job.sh
-
 # configure params
 # change $NAME in the job.sh file
-sed "s/\$NAME/$NAME/g" job.sh > job.sh.tmp && mv job.sh.tmp job.sh
+sed "s/\$NAME/$NAME/g" $GS_HPC_LIB/job-params > job.sh
 # open file for user to edit
 nano job.sh
-
 # add gaussplat job to job file
 cat $GS_HPC_LIB/gaussplat-job >> job.sh
+# execution rights
+chmod +x job.sh
 
 # copy job to hpc
-echo "Copying job to hpc..."
-scp job.sh $VSCUSER@login.hpc.ugent.be:~/scratch/tasks/$NAME/job.sh
+echo "Copying job to hpc... $VSCUSER@login.hpc.ugent.be"
+scp job.sh $VSCUSER@login.hpc.ugent.be:~/scratch/tasks/$NAME/
+rm job.sh
 
 # submit the job on hpc
+echo "Submitting job on hpc..."
 ssh $VSCUSER@login.hpc.ugent.be << EOF
     cd ~/scratch/tasks/$NAME
     module swap cluster/accelgor
