@@ -1,7 +1,17 @@
 #!/bin/bash
 
 # Get the absolute path of the directory containing this script
-LIB=$(dirname "$(readlink -f "$0")")
+# Get the absolute path of the directory containing this script
+if [[ "$1" == "--local" ]]; then
+    # Get the absolute path of the directory containing this script using $0
+    LIB=$(dirname "$(readlink -f "$0")")
+elif [[ "$1" == "--hpc" ]]; then
+    # Get the absolute path of the directory containing this script using $BASH_SOURCE
+    LIB=$(dirname "$(readlink -f "$BASH_SOURCE")")
+else
+    echo "Please provide the first argument: --hpc or --local"
+    return 1
+fi
 
 # Activate the library
 export PATH="$LIB/bin:$PATH"
