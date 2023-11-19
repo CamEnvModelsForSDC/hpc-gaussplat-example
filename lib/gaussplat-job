@@ -1,3 +1,29 @@
+#!/bin/bash
+
+
+##################################################
+# CHANGE THESE JOB PARAMETERS
+
+
+#PBS -N $NAME               ## Job name
+
+
+#PBS -l nodes=1:ppn=all       ## 1 node, 12 processors per node (ppn=all to get a full node)
+#PBS -l walltime=24:00:00     ## Max time your job will run (no more than 72:00:00)
+#PBS -l mem=48gb              ## If not used, memory will be available proportional to the max amount
+#PBS -l gpus=1                ## GPU amount (only on accelgor or joltik)
+#PBS -m abe                   ## Email notifications (abe=aborted, begin and end)
+
+
+FPS=5  # FPS to use for extracting frames
+
+
+# END OF JOB PARAMETERS
+##################################################
+
+
+
+
 
 cd $PBS_O_WORKDIR           ## Change to the working directory to where the job was submitted (the task dir)
 ROOT=$(pwd)                 ## Save the root path of the job
@@ -80,5 +106,5 @@ echo "4. Finishing up..."
 echo "Done!"
 
 # hint: use 
-# `scp $VSCUSER@login.hpc.ugent.be:$DIR/model.zip .` 
+# `scp $VSCUSER@login.hpc.ugent.be:~/scratch/$DIR/model.zip .` 
 # to download the model on your local machine

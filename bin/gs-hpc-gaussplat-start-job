@@ -2,29 +2,29 @@
 [ -z "$GS_HPC_LIB" ] && echo "Library HPC-GAUSSPLAT not activated (GS_HPC_LIB not set)" && exit 1
 echo $VSCUSER
 usage () {
-    echo "Usage: $0 <intput-directory-on-hpc>"
+    echo "Usage: $0 <scratch-input-directory>"
 }
 
 # first argument: path to the folder
 [ -z "$1" ] && echo "No path to the intput folder on the hpc given" && usage && exit 1
 # check that the task dir exists on hpc
 echo "Checking if the input directory ($1) exists on hpc..."
-if [[ $(ssh $VSCUSER@login.hpc.ugent.be "if [ ! -d $1 ]; then echo 1; else echo 0; fi") == 1 ]]; then
-    echo "Directory $1 does not exist on hpc"
+if [[ $(ssh $VSCUSER@login.hpc.ugent.be "if [ ! -d ~/scratch/$1 ]; then echo 1; else echo 0; fi") == 1 ]]; then
+    echo "Directory ~/scratch/$1 does not exist on hpc"
+    echo "  make sure the path starts from the scratch directory (leave the ~/scratch/ out of the path)"
     exit 1
 fi
 # first argument parsed
-DIR=$1
+DIR="~/scratch/$1"
 
 # create job file
 # configure params
 # change $NAME in the job.sh file to the name of the directory
 NAME=$(basename $DIR)
-sed "s/\$NAME/$NAME/g" $GS_HPC_LIB/job-params > job.sh
+sed "8s/\$NAME/$NAME/g" $GS_HPC_LIB/gaussplat-job > job.sh
+# only on line 8
 # open file for user to edit
 nano job.sh
-# add gaussplat job to job file
-cat $GS_HPC_LIB/gaussplat-job >> job.sh
 # execution rights
 chmod +x job.sh
 
@@ -36,9 +36,3 @@ rm job.sh
 # submit the job on hpc
 echo "Submitting job on hpc..."
 ssh $VSCUSER@login.hpc.ugent.be "cd $DIR; module swap cluster/accelgor; qsub job.sh > jobid.txt; echo \"Job created with id: \$(cat jobid.txt)\""
-
-
-# TODO:
-# - add all params to qsub
-# - add more params to job-params
-# - add logging for timing seperated parts of the job script
