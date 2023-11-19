@@ -22,9 +22,7 @@ echo "0. Resizing videos to max 1600 pixels (width)..."
     for file in video-*.mp4; do
         ffmpeg -loglevel warning -nostats -i $file -vf "scale='min(1600,iw)':-2" $(basename $file .mp4)-resized.mp4
     done
-    # remove the old videos
-    rm video-*.mp4
-    # rename the resized videos
+    # rename the resized videos (remove -resized) (will overwrite the original videos)
     for file in video-*-resized.mp4; do
         mv $file $(basename $file -resized.mp4).mp4
     done
