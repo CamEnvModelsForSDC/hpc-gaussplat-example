@@ -2,23 +2,24 @@
 [ -z "$GS_HPC_LIB" ] && echo "Library HPC-GAUSSPLAT not activated (GS_HPC_LIB not set)" && exit 1
 echo $VSCUSER
 usage () {
-    echo "Usage: $0 <task-name>"
+    echo "Usage: $0 <intput-directory-on-hpc>"
 }
 
-# first argument: name of the scene
-[ -z "$1" ] && echo "No task name given" && usage && exit 1
+# first argument: path to the folder
+[ -z "$1" ] && echo "No path to the intput folder on the hpc given" && usage && exit 1
 # check that the task dir exists on hpc
-echo "Checking if task dir exists on hpc..."
-if [[ $(ssh $VSCUSER@login.hpc.ugent.be "if [ ! -d ~/scratch/tasks/$1 ]; then echo 1; else echo 0; fi") == 1 ]]; then
-    echo "Directory ~/scratch/tasks/$1 does not exist on hpc"
+echo "Checking if the input directory ($1) exists on hpc..."
+if [[ $(ssh $VSCUSER@login.hpc.ugent.be "if [ ! -d $1 ]; then echo 1; else echo 0; fi") == 1 ]]; then
+    echo "Directory $1 does not exist on hpc"
     exit 1
 fi
 # first argument parsed
-NAME=$1
+DIR=$1
 
 # create job file
 # configure params
-# change $NAME in the job.sh file
+# change $NAME in the job.sh file to the name of the directory
+NAME=$(basename $DIR)
 sed "s/\$NAME/$NAME/g" $GS_HPC_LIB/job-params > job.sh
 # open file for user to edit
 nano job.sh
@@ -29,12 +30,12 @@ chmod +x job.sh
 
 # copy job to hpc
 echo "Copying job to hpc... $VSCUSER@login.hpc.ugent.be"
-scp job.sh $VSCUSER@login.hpc.ugent.be:~/scratch/tasks/$NAME/
+scp job.sh $VSCUSER@login.hpc.ugent.be:$DIR
 rm job.sh
 
 # submit the job on hpc
 echo "Submitting job on hpc..."
-ssh $VSCUSER@login.hpc.ugent.be "cd ~/scratch/tasks/$NAME; module swap cluster/accelgor; qsub job.sh > jobid.txt; echo \"Job created with id: \$(cat jobid.txt)\""
+ssh $VSCUSER@login.hpc.ugent.be "cd $DIR; module swap cluster/accelgor; qsub job.sh > jobid.txt; echo \"Job created with id: \$(cat jobid.txt)\""
 
 
 # TODO:

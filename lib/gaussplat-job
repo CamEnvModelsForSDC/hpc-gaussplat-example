@@ -2,29 +2,22 @@
 cd $PBS_O_WORKDIR           ## Change to the working directory to where the job was submitted (the task dir)
 ROOT=$(pwd)                 ## Save the root path of the job
 
-# the expected dir structure on the hpc looks like this
-# scratch                       
-# └── tasks
-#     ├── $NAME
-#     │   ├── activity.csv
-#     │   ├── index.html
-#     │   ├── jobid.txt         (id of this job)
-#     │   ├── job.sh            (this file)
-#     │   ├── properties.csv
-#     │   ├── video-<angle>.mp4
-#     │   └── ...
-#     └ ...
+# the expected minimal dir structure on the hpc looks like this
+# INPUT-DIR   
+# ├── jobid.txt       (id of this job)
+# ├── job.sh          (this file)
+# ├── <video-1>.mp4
+# ├── <video-2>.mp4
+# └── ...
+
 
 echo "0. Resizing videos to max 1600 pixels (width)..."
     module purge
     module load FFmpeg/6.0-GCCcore-12.3.0
     # resize all videos to max 1600 pixels (width)
-    for file in video-*.mp4; do
+    for file in *.mp4; do
         ffmpeg -loglevel warning -nostats -i $file -vf "scale='min(1600,iw)':-2" $(basename $file .mp4)-resized.mp4
-    done
-    # rename the resized videos (remove -resized) (will overwrite the original videos)
-    for file in video-*-resized.mp4; do
-        mv $file $(basename $file -resized.mp4).mp4
+        mv $(basename $file .mp4)-resized.mp4 $file  # overwrite the original video
     done
 
 
@@ -34,7 +27,7 @@ echo "1. Extracting frames from videos..."
     mkdir scene
     mkdir scene/input  # for the frames
     # extract frames from all videos
-    for file in video-*.mp4; do
+    for file in *.mp4; do
         ffmpeg -loglevel warning -nostats -i $file -vf "fps=$FPS" scene/input/$(basename $file .mp4)-%04d.jpg
     done
 
@@ -82,10 +75,10 @@ echo "3. Training..."
 echo "4. Finishing up..."
     cd $ROOT
     # basename $ROOT = $NAME
-    zip -r $(basename $ROOT)-model.zip model
+    zip -r model.zip model
 
 echo "Done!"
 
 # hint: use 
-# `scp $VSCUSER@login.hpc.ugent.be:~/scratch/tasks/$NAME/$NAME-model.zip .` 
+# `scp $VSCUSER@login.hpc.ugent.be:$DIR/model.zip .` 
 # to download the model on your local machine
