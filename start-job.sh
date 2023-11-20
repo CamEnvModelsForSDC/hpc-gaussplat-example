@@ -24,7 +24,7 @@ DIR="~/scratch/$1"
 # create job file
 # change $NAME in the job.sh file to the name of the directory
 NAME=$(basename $DIR)
-sed "8s/\$NAME/$NAME/g" gaussplat-job > job.sh
+sed "8s/\$NAME/$NAME/g" gaussplat-job.sh > job.sh
 # open file for user to edit the job parameters at the top
 nano job.sh
 # execution rights

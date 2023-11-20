@@ -3,15 +3,15 @@ Creating & submitting a [3D Gaussian Splatting](https://github.com/graphdeco-inr
 
 This repository contains a basic example of how to create and submit a Gaussian Splatting job on the HPC. For conducting any research on Gaussian Splatting, you should adapt this code to your needs. This repository is meant as a starting point for your own research.
 
-The `gaussplat-job` file is the job to be submitted on a GPU cluster on the HPC. The `start-job` script, which will create a copy of the job on the HPC and submit it there. This is a script that you run locally, the script will send commands over ssh to the hpc when needed. In order to use this start-job script, some environment variables must be set. Edit the `VSCUSER` variable at the top of `start-job`, and optionally the `VSCCLUSTER` variable if you want to use a different cluster.
+The `gaussplat-job.sh` file is the job to be submitted on a GPU cluster on the HPC. The `start-job.sh` script, which will create a copy of the job on the HPC and submit it there. This is a script that you run locally, the script will send commands over ssh to the hpc when needed. In order to use this start-job script, some environment variables must be set. Edit the `VSCUSER` variable at the top of `start-job.sh`, and optionally the `VSCCLUSTER` variable if you want to use a different cluster.
 
-The `start-job` script will also open up the job, before sending it over to the HPC. This is done so that you can edit the job parameters before submitting it.
+The `start-job.sh` script will also open up the job, before sending it over to the HPC. This is done so that you can edit the job parameters before submitting it.
 
 
 
 # Usage
 ```
-./start-job <scratch-input-directory>
+./start-job.sh <scratch-input-directory>
 ```
 The `<scratch-input-directory>` has to be a directory located on the HPC in the `~/scratch` dir. So if your video files for the scene are located in a directory `~/scratch/tasks/pyramid` then the `<scratch-input-directory>` should be `tasks/pyramid`.
 
