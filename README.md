@@ -9,10 +9,11 @@ The `start-job` script will also open up the job, before sending it over to the 
 
 
 
-# Library executables
-
-`gs-hpc-gaussplat-start-job <scratch-input-directory>`: \
-starts a gaussian splatting job on the HPC, the input directory will first be checked if it exists on the hpc. Then a job is submitted to the HPC and the output & model are written to the input folder. Parameters for the job can be set in the file (the job) that will be opened on execution of this script.
+# Usage
+```
+./start-job <scratch-input-directory>
+```
+The `<scratch-input-directory>` has to be a directory located on the HPC in the `~/scratch` dir. So if your video files for the scene are located in a directory `~/scratch/tasks/pyramid` then the `<scratch-input-directory>` should be `tasks/pyramid`.
 
 # Tips & tricks
 
