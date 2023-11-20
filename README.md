@@ -20,3 +20,5 @@ The `<scratch-input-directory>` has to be a directory located on the HPC in the 
 You can use `scp $VSCUSER@login.hpc.ugent.be:~/scratch/<scratch-input-directory>/model.zip .` to download the model from the HPC
 
 Colmap uses a lot of memory and time, so make sure the job parameters are set accordingly. With the default parameters it took about 3h30 and 20GB of ram in order to process a scene consisting of 150 frames or images.
+
+More information on the HPC can be found [here](HPC.md)
