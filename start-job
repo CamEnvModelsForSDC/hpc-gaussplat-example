@@ -1,6 +1,9 @@
 #!/bin/bash
-VSCUSER="vsc45248"  # your vsc account
+VSCUSER=""  # your vsc account
 CLUSTER="accelgor"  # accelgor or joltik
+
+# check that VSCUSER is set
+[ -z "$VSCUSER" ] && echo "VSCUSER is not set, open this file and set it to your vsc account" && exit 1
 
 usage () {
     echo "Usage: $0 <scratch-input-directory>"
